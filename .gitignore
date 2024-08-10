@@ -1,0 +1,6 @@
+.env
+data
+__pycache__
+session.session
+session.session-journal
+errors.txt
