@@ -1,6 +1,8 @@
 .env
 data
 __pycache__
-session.session
-session.session-journal
+*.session
+*.session-journal
 errors.txt
+*.sqlite3
+test.py
