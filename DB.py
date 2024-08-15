@@ -62,6 +62,14 @@ class DB:
             name TEXT
         );
 
+        CREATE TABLE IF NOT EXISTS ids (
+            id INTEGER PRIMARY KEY,
+            user_id INTEGER,
+            message_id INTEGER,
+            is_closed BOOLEAN DEFAULT 0,
+            store_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
         CREATE TABLE IF NOT EXISTS questions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             question TEXT,
@@ -167,3 +175,32 @@ class DB:
             "SELECT * FROM questions",
         )
         return cr.fetchall()
+
+    @staticmethod
+    @lock_and_release
+    async def add_id(
+        i: int,
+        user_id: int,
+        message_id: int,
+        is_closed: bool,
+        cr: sqlite3.Cursor = None,
+    ):
+        cr.execute(
+            "INSERT INTO ids(id, user_id, message_id, is_closed) VALUES(?, ?, ?, ?)",
+            (i, user_id, message_id, is_closed),
+        )
+
+    @staticmethod
+    @lock_and_release
+    async def close_account(i: int, cr: sqlite3.Cursor = None):
+        cr.execute("UPDATE ids SET is_closed = 1 WHERE id = ?", (i,))
+
+    @staticmethod
+    @connect_and_close
+    def get_ids(i: int = None, cr: sqlite3.Cursor = None):
+        if i:
+            cr.execute("SELECT * FROM ids WHERE id = ?", (i,))
+            return cr.fetchone()
+        else:
+            cr.execute("SELECT * FROM ids")
+            return cr.fetchall()

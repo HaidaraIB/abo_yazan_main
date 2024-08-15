@@ -20,12 +20,14 @@ from start import (
     inits,
 )
 
+from jobs import edit_ids_info
+
 from common import (
     back_to_user_home_page_handler,
     back_to_admin_home_page_handler,
     invalid_callback_data,
     error_handler,
-    create_folders
+    create_folders,
 )
 
 from user.user_calls import *
@@ -44,7 +46,8 @@ from user.send_id import *
 import os
 from DB import DB
 
-from telethon_bot.copy_messages import get_post
+from PyroClientSingleton import PyroClientSingleton
+
 
 def main():
     create_folders()
@@ -104,8 +107,19 @@ def main():
 
     app.add_error_handler(error_handler)
 
-    app.job_queue.run_repeating(
-
+    app.job_queue.run_once(
+        callback=edit_ids_info,
+        when=10,
     )
 
-    app.run_polling(allowed_updates=Update.ALL_TYPES)
+    try:
+        PyroClientSingleton().start()
+    except ConnectionError:
+        pass
+
+    app.run_polling(allowed_updates=Update.ALL_TYPES, close_loop=False)
+
+    try:
+        PyroClientSingleton().stop()
+    except ConnectionError:
+        pass

@@ -3,6 +3,7 @@ from telegram import (
     InlineKeyboardButton,
     InlineKeyboardMarkup,
     Chat,
+    error,
     KeyboardButton,
     KeyboardButtonRequestChat,
     KeyboardButtonRequestUsers,
@@ -27,10 +28,7 @@ import uuid
 import traceback
 import json
 
-from custom_filters.User import User
-from custom_filters.Admin import Admin
-
-from pyrogram import Client
+from custom_filters import User, Admin
 
 from dotenv import load_dotenv
 
@@ -42,16 +40,27 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     level=logging.INFO,
 )
-if int(os.getenv("OWNER_ID")) != 755501092:
-    logging.getLogger("httpx").setLevel(logging.WARNING)
 
 
-cpyro = Client(
-    name="session",
-    api_id=int(os.getenv("API_ID")),
-    api_hash=os.getenv("API_HASH"),
-    phone_number=os.getenv("PHONE"),
-)
+async def edit_message_text(
+    context: ContextTypes.DEFAULT_TYPE,
+    chat_id: int,
+    message_id: int,
+    text: str,
+):
+    try:
+        await context.bot.edit_message_text(
+            chat_id=chat_id,
+            message_id=message_id,
+            text=text,
+        )
+    except error.BadRequest as e:
+        if "Message is not modified:" in e.message:
+            pass
+        else:
+            write_error(
+                f"{''.join(traceback.format_exception(None, context.error, context.error.__traceback__))}\n\n"
+            )
 
 
 async def check_if_user_member(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -125,14 +134,17 @@ def build_admin_keyboard():
     return InlineKeyboardMarkup(keyboard)
 
 
-def build_back_button(data:str):
+def build_back_button(data: str):
     return [InlineKeyboardButton(text="الرجوع🔙", callback_data=data)]
+
 
 def callback_button_uuid_generator():
     return uuid.uuid4().hex
 
+
 def stringify_question(q):
     return "السؤال:\n" f"{q['question']}\n\n" "الجواب:\n" f"{q['answer']}"
+
 
 back_to_admin_home_page_button = [
     [
@@ -224,32 +236,25 @@ async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> N
         return
     update_str = update.to_dict() if isinstance(update, Update) else str(update)
     try:
-        error = f"""update = {json.dumps(update_str, indent=2, ensure_ascii=False)} 
-        
-user_data = {str(context.user_data)}
-chat_data = {str(context.chat_data)}
-
-{''.join(traceback.format_exception(None, context.error, context.error.__traceback__))}
-
-{'-'*100}
-
-
-    """
+        error = (
+            f"update = {json.dumps(update_str, indent=2, ensure_ascii=False)}\n\n"
+            f"user_data = {str(context.user_data)}\n"
+            f"chat_data = {str(context.chat_data)}\n\n"
+            f"{''.join(traceback.format_exception(None, context.error, context.error.__traceback__))}\n\n"
+        )
 
         with open("errors.txt", "a", encoding="utf-8") as f:
             f.write(error)
     except TypeError:
-        error = f"""update = TypeError
-        
-user_data = {str(context.user_data)}
-chat_data = {str(context.chat_data)}
+        error = (
+            f"update = TypeError\n\n"
+            f"user_data = {str(context.user_data)}\n"
+            f"chat_data = {str(context.chat_data)}\n\n"
+            f"{''.join(traceback.format_exception(None, context.error, context.error.__traceback__))}\n\n"
+        )
+        write_error(error=error)
 
-{''.join(traceback.format_exception(None, context.error, context.error.__traceback__))}
 
-{'-'*100}
-
-
-    """
-
-        with open("errors.txt", "a", encoding="utf-8") as f:
-            f.write(error)
+def write_error(error: str):
+    with open("errors.txt", "a", encoding="utf-8") as f:
+        f.write(error + f"{'-'*100}\n\n\n")
