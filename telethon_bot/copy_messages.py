@@ -42,6 +42,12 @@ client = TelegramClient(
     api_id=int(os.getenv("API_ID")),
 ).start(phone=os.getenv("PHONE"))
 
+bot_client = TelegramClient(
+    session="telethon_bot_session",
+    api_hash=os.getenv("API_HASH"),
+    api_id=int(os.getenv("API_ID")),
+).start(bot_token=os.getenv("BOT_TOKEN"))
+
 
 @client.on(events.NewMessage(chats=FROM + VIP_FROM))
 @client.on(events.Album(chats=FROM + VIP_FROM))
@@ -65,33 +71,35 @@ async def copy_messages(event, gallery, to):
         # Single Photo
         if (message.photo and not message.web_preview) or message.video:
             for channel in to:
-                caption = message.text.replace(
-                    "[🔗 REGISTER HERE ](https://bit.ly/QUOTEXVIP_MrSHEKO)\nCode : (MrSHEKO) 50% Deposit bounus",
-                    "[🔗 REGISTER HEAR ](https://broker-qx.pro/sign-up/?lid=873616)\n(aboyazan)%كود بونص 50",
-                )
-                buttons = None
-                if channel == PUBLIC_CHANNEL:
-                    caption = "نتائج جروب الـ vip للإنضمام:"
-                    buttons = [
-                        [
-                            Button.url("TEAM ABO YAZAN", "t.me/BOUCHA_A"),
-                            Button.url("abo yazan", "t.me/aboyazan1_bot"),
-                        ],
-                    ]
-
                 if event.is_reply:
                     stored_msg = TelethonDB.get_messages(
                         from_message_id=message.reply_to_msg_id,
                         from_channel_id=event.chat_id,
                         to_channel_id=channel,
                     )
-                msg = await client.send_file(
-                    channel,
-                    caption=caption,
-                    file=message.photo if message.photo else message.video,
-                    reply_to=stored_msg[0] if stored_msg else None,
-                    buttons=buttons,
-                )
+                if channel == PUBLIC_CHANNEL and "Profit" in message.text:
+                    msg = await bot_client.send_file(
+                        channel,
+                        caption=("ربح ✅✅✅\n" "للإنظمام الى جروب الـvip 🔥"),
+                        file=message.photo if message.photo else message.video,
+                        reply_to=stored_msg[0] if stored_msg else None,
+                        buttons=[
+                            [
+                                Button.url("TEAM ABO YAZAN", "t.me/BOUCHA_A"),
+                                Button.url("abo yazan", "t.me/aboyazan1_bot"),
+                            ],
+                        ],
+                    )
+                else:
+                    msg = await client.send_file(
+                        channel,
+                        caption=message.text.replace(
+                            "[🔗 REGISTER HERE ](https://bit.ly/QUOTEXVIP_MrSHEKO)\nCode : (MrSHEKO) 50% Deposit bounus",
+                            "[🔗 REGISTER HEAR ](https://broker-qx.pro/sign-up/?lid=873616)\n(aboyazan)%كود بونص 50",
+                        ),
+                        file=message.photo if message.photo else message.video,
+                        reply_to=stored_msg[0] if stored_msg else None,
+                    )
                 await TelethonDB.add_message(
                     from_message_id=message.id,
                     to_message_id=msg.id,
@@ -101,22 +109,27 @@ async def copy_messages(event, gallery, to):
         # Just Text
         else:
             for channel in to:
-                if channel == PUBLIC_CHANNEL:
-                    continue
                 if event.is_reply:
                     stored_msg = TelethonDB.get_messages(
                         from_message_id=message.reply_to_msg_id,
                         from_channel_id=event.chat_id,
                         to_channel_id=channel,
                     )
-                msg = await client.send_message(
-                    channel,
-                    message.text.replace(
-                        "[🔗 REGISTER HERE ](https://bit.ly/QUOTEXVIP_MrSHEKO)\nCode : (MrSHEKO) 50% Deposit bounus",
-                        "[🔗 REGISTER HEAR ](https://broker-qx.pro/sign-up/?lid=873616)\n(aboyazan)%كود بونص 50",
-                    ),
-                    reply_to=stored_msg[0] if stored_msg else None,
-                )
+                if channel == PUBLIC_CHANNEL and "Open your Platform" in message.text:
+                    msg = await client.send_message(
+                        channel,
+                        "نبدأ الجلسة على جروب الـvip 🔥",
+                        reply_to=stored_msg[0] if stored_msg else None,
+                    )
+                else:
+                    msg = await client.send_message(
+                        channel,
+                        message.text.replace(
+                            "[🔗 REGISTER HERE ](https://bit.ly/QUOTEXVIP_MrSHEKO)\nCode : (MrSHEKO) 50% Deposit bounus",
+                            "[🔗 REGISTER HEAR ](https://broker-qx.pro/sign-up/?lid=873616)\n(aboyazan)%كود بونص 50",
+                        ),
+                        reply_to=stored_msg[0] if stored_msg else None,
+                    )
                 await TelethonDB.add_message(
                     from_message_id=message.id,
                     to_message_id=msg.id,
