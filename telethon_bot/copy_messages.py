@@ -1,4 +1,4 @@
-from telethon import events, TelegramClient
+from telethon import events, TelegramClient, Button
 from telethon.tl.patched import Message
 import os
 import asyncio
@@ -10,16 +10,23 @@ load_dotenv()
 
 FROM = [
     -1001820088359,
-    -1001771915378
+]
+
+VIP_FROM = [
+    -1001771915378,
 ]
 
 TO = [
-    -1002165082360
+    -1002165082360,
 ]
 
-ANOTHER_TO = [
-    -1002212821302
+VIP_TO = [
+    -1002212821302,
+    -1002107793881,
 ]
+
+PUBLIC_CHANNEL = -1002107793881
+
 subs = [
     "Group rules:",
     "Promocode",
@@ -35,8 +42,9 @@ client = TelegramClient(
     api_id=int(os.getenv("API_ID")),
 ).start(phone=os.getenv("PHONE"))
 
-@client.on(events.NewMessage(chats=FROM))
-@client.on(events.Album(chats=FROM))
+
+@client.on(events.NewMessage(chats=FROM + VIP_FROM))
+@client.on(events.Album(chats=FROM + VIP_FROM))
 async def get_post(event):
     gallery = getattr(event, "messages", None)
     if event.grouped_id and not gallery:
@@ -45,7 +53,7 @@ async def get_post(event):
     if event.chat_id == FROM[0]:
         await copy_messages(event, gallery, TO)
     elif all(sub not in event.message.text for sub in subs):
-        await copy_messages(event, gallery, ANOTHER_TO)
+        await copy_messages(event, gallery, VIP_TO)
 
     raise events.StopPropagation
 
@@ -57,6 +65,20 @@ async def copy_messages(event, gallery, to):
         # Single Photo
         if (message.photo and not message.web_preview) or message.video:
             for channel in to:
+                caption = message.text.replace(
+                    "[🔗 REGISTER HERE ](https://bit.ly/QUOTEXVIP_MrSHEKO)\nCode : (MrSHEKO) 50% Deposit bounus",
+                    "[🔗 REGISTER HEAR ](https://broker-qx.pro/sign-up/?lid=873616)\n(aboyazan)%كود بونص 50",
+                )
+                buttons = None
+                if channel == PUBLIC_CHANNEL:
+                    caption = "نتائج جروب الـ vip للإنضمام:"
+                    buttons = [
+                        [
+                            Button.url("TEAM ABO YAZAN", "t.me/BOUCHA_A"),
+                            Button.url("abo yazan", "t.me/aboyazan1_bot"),
+                        ],
+                    ]
+
                 if event.is_reply:
                     stored_msg = TelethonDB.get_messages(
                         from_message_id=message.reply_to_msg_id,
@@ -65,12 +87,10 @@ async def copy_messages(event, gallery, to):
                     )
                 msg = await client.send_file(
                     channel,
-                    caption=message.text.replace(
-                        "[🔗 REGISTER HERE ](https://bit.ly/QUOTEXVIP_MrSHEKO)\nCode : (MrSHEKO) 50% Deposit bounus",
-                        "[🔗 REGISTER HEAR ](https://broker-qx.pro/sign-up/?lid=873616)\n(aboyazan)%كود بونص 50",
-                    ),
+                    caption=caption,
                     file=message.photo if message.photo else message.video,
                     reply_to=stored_msg[0] if stored_msg else None,
+                    buttons=buttons,
                 )
                 await TelethonDB.add_message(
                     from_message_id=message.id,
@@ -81,6 +101,8 @@ async def copy_messages(event, gallery, to):
         # Just Text
         else:
             for channel in to:
+                if channel == PUBLIC_CHANNEL:
+                    continue
                 if event.is_reply:
                     stored_msg = TelethonDB.get_messages(
                         from_message_id=message.reply_to_msg_id,
@@ -104,6 +126,8 @@ async def copy_messages(event, gallery, to):
     # Albums
     else:
         for channel in to:
+            if channel == PUBLIC_CHANNEL:
+                continue
             if event.is_reply:
                 stored_msg = TelethonDB.get_messages(
                     from_message_id=gallery[0].reply_to_msg_id,
