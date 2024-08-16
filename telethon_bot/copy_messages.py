@@ -49,12 +49,6 @@ client = TelegramClient(
     api_id=int(os.getenv("API_ID")),
 ).start(phone=os.getenv("PHONE"))
 
-bot_client = TelegramClient(
-    session="telethon_bot_session",
-    api_hash=os.getenv("API_HASH"),
-    api_id=int(os.getenv("API_ID")),
-).start(bot_token=os.getenv("BOT_TOKEN"))
-
 
 @client.on(events.NewMessage(chats=FROM + VIP_FROM))
 @client.on(events.Album(chats=FROM + VIP_FROM))
@@ -85,17 +79,15 @@ async def copy_messages(event, gallery, to):
                         to_channel_id=channel,
                     )
                 if channel == PUBLIC_CHANNEL and "Profit" in message.text:
-                    msg = await bot_client.send_file(
+                    msg = await client.send_file(
                         channel,
-                        caption=("ربح ✅✅✅\n" "للإنظمام الى جروب الـvip 🔥"),
+                        caption=(
+                            "ربح ✅✅✅\n"
+                            "للإنظمام الى جروب الـvip 🔥\n\n"
+                            "[TEAM ABO YAZAN](t.me/BOUCHA_A)      [abo yazan](t.me/aboyazan1_bot)"
+                        ),
                         file=message.photo if message.photo else message.video,
                         reply_to=stored_msg[0] if stored_msg else None,
-                        buttons=[
-                            [
-                                Button.url("TEAM ABO YAZAN", "t.me/BOUCHA_A"),
-                                Button.url("abo yazan", "t.me/aboyazan1_bot"),
-                            ],
-                        ],
                     )
                 else:
                     msg = await client.send_file(
