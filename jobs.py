@@ -48,6 +48,7 @@ async def edit_ids_info(context: ContextTypes.DEFAULT_TYPE):
             message_id=int(i["message_id"]),
             text=important_info,
         )
+        await DB.update_message_text(i=i["id"], new_text=important_info)
         await asyncio.sleep(random.randint(3, 10))
 
     context.job_queue.run_once(

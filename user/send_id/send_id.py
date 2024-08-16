@@ -89,6 +89,7 @@ async def get_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 i=i,
                 user_id=update.effective_user.id,
                 message_id=msg.id,
+                message_text=text,
                 is_closed=is_closed,
             )
 

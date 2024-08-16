@@ -66,6 +66,7 @@ class DB:
             id INTEGER PRIMARY KEY,
             user_id INTEGER,
             message_id INTEGER,
+            message_text TEXT,
             is_closed BOOLEAN DEFAULT 0,
             store_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
@@ -182,13 +183,19 @@ class DB:
         i: int,
         user_id: int,
         message_id: int,
+        message_text: str,
         is_closed: bool,
         cr: sqlite3.Cursor = None,
     ):
         cr.execute(
-            "INSERT INTO ids(id, user_id, message_id, is_closed) VALUES(?, ?, ?, ?)",
-            (i, user_id, message_id, is_closed),
+            "INSERT INTO ids(id, user_id, message_id, message_text, is_closed) VALUES(?, ?, ?, ?, ?)",
+            (i, user_id, message_id, message_text, is_closed),
         )
+
+    @staticmethod
+    @lock_and_release
+    async def update_message_text(i: int, new_text: str, cr: sqlite3.Cursor = None):
+        cr.execute("UPDATE ids SET message_text = ? WHERE id = ?", (new_text, i))
 
     @staticmethod
     @lock_and_release
