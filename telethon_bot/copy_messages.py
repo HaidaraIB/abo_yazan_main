@@ -89,7 +89,7 @@ async def copy_messages(event, gallery, to):
                         file=message.photo if message.photo else message.video,
                         reply_to=stored_msg[0] if stored_msg else None,
                     )
-                else:
+                elif channel != PUBLIC_CHANNEL:
                     msg = await client.send_file(
                         channel,
                         caption=message.text.replace(
@@ -120,7 +120,7 @@ async def copy_messages(event, gallery, to):
                         "نبدأ الجلسة على جروب الـvip 🔥",
                         reply_to=stored_msg[0] if stored_msg else None,
                     )
-                else:
+                elif channel != PUBLIC_CHANNEL:
                     msg = await client.send_message(
                         channel,
                         message.text.replace(
