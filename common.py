@@ -281,6 +281,7 @@ def insert_into_remote_db(data: list):
     cr.close()
     mydb.close()
 
+
 def update_into_remote_db(data: list):
     mydb = mysql.connector.connect(
         host=os.getenv("REMOTE_DB_HOST"),
@@ -309,3 +310,29 @@ def update_into_remote_db(data: list):
     mydb.commit()
     cr.close()
     mydb.close()
+
+
+def get_from_remote_db(trader_id: int):
+    mydb = mysql.connector.connect(
+        host=os.getenv("REMOTE_DB_HOST"),
+        user=os.getenv("REMOTE_DB_USERNAME"),
+        password=os.getenv("REMOTE_DB_PASSWORD"),
+        database=os.getenv("REMOTE_DB_NAME"),
+    )
+
+    cr = mydb.cursor()
+
+    cr.execute(
+        f"""
+            SELECT * FROM transactions
+            WHERE `trader-id` = %s;
+        """,
+        (trader_id,),
+    )
+    
+    res = cr.fetchone()
+
+    cr.close()
+    mydb.close()
+
+    return res

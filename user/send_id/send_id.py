@@ -18,6 +18,7 @@ from common import (
     edit_message_text,
     insert_into_remote_db,
     update_into_remote_db,
+    get_from_remote_db,
 )
 from user.send_id.common import extract_important_info
 from start import start_command
@@ -78,8 +79,6 @@ async def get_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 message_id=int(stored_id["message_id"]),
                 text="/".join(data) + (" ❌" if is_closed else ""),
             )
-            update_into_remote_db(data=data)
-
         else:
             if "ACCOUNT CLOSED" in rcvd.text:
                 is_closed = True
@@ -97,6 +96,10 @@ async def get_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 message_text="/".join(data) + (" ❌" if is_closed else ""),
                 is_closed=is_closed,
             )
+        remote_data = get_from_remote_db(trader_id=data[0])
+        if remote_data:
+            update_into_remote_db(data=data)
+        else:
             insert_into_remote_db(data=data)
 
         nums = re.findall(r"\d+\.?\d*", rcvd.text)
