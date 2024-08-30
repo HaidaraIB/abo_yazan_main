@@ -64,15 +64,15 @@ async def get_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return ConversationHandler.END
 
         stored_id = DB.get_ids(i=i)
+        if "ACCOUNT CLOSED" in rcvd.text:
+            is_closed = True
+        else:
+            is_closed = False
+        data = extract_important_info(rcvd.text, is_closed=is_closed)
         if stored_id:
-            if "ACCOUNT CLOSED" in rcvd.text:
-                is_closed = True
-                data = extract_important_info(rcvd.text, is_closed=is_closed)
+            if is_closed and not stored_id["is_closed"]:
                 await DB.close_account(i=i)
-            else:
-                is_closed = False
-                data = extract_important_info(rcvd.text, is_closed=is_closed)
-                await DB.update_message_text(i=i["id"], new_text="/".join(data))
+            await DB.update_message_text(i=i, new_text="/".join(data))
             await edit_message_text(
                 context=context,
                 chat_id=int(os.getenv("IDS_CHANNEL_ID")),
@@ -80,11 +80,6 @@ async def get_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 text="/".join(data) + (" ❌" if is_closed else ""),
             )
         else:
-            if "ACCOUNT CLOSED" in rcvd.text:
-                is_closed = True
-            else:
-                is_closed = False
-            data = extract_important_info(rcvd.text, is_closed=is_closed)
             msg = await context.bot.send_message(
                 chat_id=int(os.getenv("IDS_CHANNEL_ID")),
                 text="/".join(data) + (" ❌" if is_closed else ""),
@@ -102,13 +97,17 @@ async def get_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             insert_into_remote_db(data=data)
 
-        nums = re.findall(r"\d+\.?\d*", rcvd.text)
-
-        if float(nums[6]) == 0:
+        if float(data[5]) == 0 and not is_closed:
             await wait_message.edit_text(
                 text="تم التأكد من تسجيلك يرجى ايداع 10دولار في الحساب لإكمال شروطك .ثم إعادة إرسال  الـid هنا .ليتم إضافتك إلى جروب vip .",
                 reply_markup=build_user_keyboard(),
             )
+        elif is_closed:
+            await wait_message.edit_text(
+                text="هذا الحساب مغلق",
+                reply_markup=build_user_keyboard(),
+            )
+
         else:
             await wait_message.edit_text(
                 text=(

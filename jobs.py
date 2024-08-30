@@ -28,16 +28,6 @@ async def edit_ids_info(context: ContextTypes.DEFAULT_TYPE):
             chat_id="@QuotexPartnerBot",
             message_ids=sent.id + 1,
         )
-        if "ACCOUNT CLOSED" in rcvd.text:
-            important_info = extract_important_info(rcvd.text, is_closed=True)
-            await DB.close_account(i=i["id"])
-            await edit_message_text(
-                context=context,
-                chat_id=int(os.getenv("IDS_CHANNEL_ID")),
-                message_id=int(i["message_id"]),
-                text="/".join(important_info) + " ❌",
-            )
-            continue
 
         if (
             (str(i["id"]) not in rcvd.text)
@@ -46,12 +36,23 @@ async def edit_ids_info(context: ContextTypes.DEFAULT_TYPE):
         ):
             continue
 
-        important_info = extract_important_info(text=rcvd.text, is_closed=False)
+        if "ACCOUNT CLOSED" in rcvd.text:
+            is_closed = True
+        else:
+            is_closed = False
+
+        important_info = extract_important_info(rcvd.text, is_closed=is_closed)
+
+        if is_closed:
+            stored_id = DB.get_ids(i=i["id"])
+            if not stored_id["is_closed"]:
+                await DB.close_account(i=i["id"])
+
         await edit_message_text(
             context=context,
             chat_id=int(os.getenv("IDS_CHANNEL_ID")),
             message_id=int(i["message_id"]),
-            text="/".join(important_info),
+            text="/".join(important_info) + (" ❌" if is_closed else ""),
         )
         await DB.update_message_text(i=i["id"], new_text="/".join(important_info))
         remote_data = get_from_remote_db(trader_id=i["id"])
