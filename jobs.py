@@ -55,9 +55,9 @@ async def edit_ids_info(context: ContextTypes.DEFAULT_TYPE):
         await DB.update_message_text(i=i["id"], new_text="/".join(important_info))
         remote_data = get_from_remote_db(trader_id=i["id"])
         if remote_data:
-            update_into_remote_db(data=important_info)
+            update_into_remote_db(data=important_info, is_closed=int(is_closed))
         else:
-            insert_into_remote_db(data=important_info)
+            insert_into_remote_db(data=important_info, is_closed=int(is_closed))
         await asyncio.sleep(random.randint(3, 10))
 
     context.job_queue.run_once(

@@ -212,7 +212,7 @@ def write_error(error: str):
         f.write(error + f"{'-'*100}\n\n\n")
 
 
-def insert_into_remote_db(data: list):
+def insert_into_remote_db(data: list, is_closed: int):
     mydb = mysql.connector.connect(
         host=os.getenv("REMOTE_DB_HOST"),
         user=os.getenv("REMOTE_DB_USERNAME"),
@@ -239,7 +239,7 @@ def insert_into_remote_db(data: list):
         )
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
         """,
-        data,
+        (*data, is_closed),
     )
 
     mydb.commit()
@@ -247,7 +247,7 @@ def insert_into_remote_db(data: list):
     mydb.close()
 
 
-def update_into_remote_db(data: list):
+def update_into_remote_db(data: list, is_closed: int):
     mydb = mysql.connector.connect(
         host=os.getenv("REMOTE_DB_HOST"),
         user=os.getenv("REMOTE_DB_USERNAME"),
@@ -270,7 +270,7 @@ def update_into_remote_db(data: list):
                 `is-closed` = %s
             WHERE `trader-id` = %s;
         """,
-        (*data[4:], data[0]),
+        (*data[3:], is_closed, data[0]),
     )
 
     mydb.commit()

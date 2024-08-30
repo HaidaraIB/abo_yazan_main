@@ -93,9 +93,9 @@ async def get_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
         remote_data = get_from_remote_db(trader_id=data[0])
         if remote_data:
-            update_into_remote_db(data=data)
+            update_into_remote_db(data=data, is_closed=int(is_closed))
         else:
-            insert_into_remote_db(data=data)
+            insert_into_remote_db(data=data, is_closed=int(is_closed))
 
         if float(data[5]) == 0 and not is_closed:
             await wait_message.edit_text(
