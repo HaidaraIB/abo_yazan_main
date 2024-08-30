@@ -12,6 +12,6 @@ class PyroClientSingleton(Client):
                 name=os.getenv("SESSION"),
                 api_id=int(os.getenv("API_ID")),
                 api_hash=os.getenv("API_HASH"),
-                bot_token=os.getenv("BOT_TOKEN"),
+                phone_number=os.getenv("PHONE"),
             )
         return cls._instance
