@@ -16,8 +16,6 @@ from common import (
 async def edit_ids_info(context: ContextTypes.DEFAULT_TYPE):
     ids = DB.get_ids()
     for i in ids:
-        if i["is_closed"]:
-            continue
         cpyro = PyroClientSingleton()
         sent = await cpyro.send_message(
             chat_id="@QuotexPartnerBot",
