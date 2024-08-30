@@ -16,6 +16,8 @@ from common import (
     back_to_user_home_page_handler,
     build_user_keyboard,
     edit_message_text,
+    insert_into_remote_db,
+    update_into_remote_db,
 )
 from user.send_id.common import extract_important_info
 from start import start_command
@@ -63,35 +65,39 @@ async def get_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
         stored_id = DB.get_ids(i=i)
         if stored_id:
             if "ACCOUNT CLOSED" in rcvd.text:
-                text = extract_important_info(rcvd.text, is_closed=True) + " ❌"
+                is_closed = True
+                data = extract_important_info(rcvd.text, is_closed=is_closed)
                 await DB.close_account(i=i)
             else:
-                text = extract_important_info(rcvd.text, is_closed=False)
+                is_closed = False
+                data = extract_important_info(rcvd.text, is_closed=is_closed)
+                await DB.update_message_text(i=i["id"], new_text="/".join(data))
             await edit_message_text(
                 context=context,
                 chat_id=int(os.getenv("IDS_CHANNEL_ID")),
                 message_id=int(stored_id["message_id"]),
-                text=text,
+                text="/".join(data) + (" ❌" if is_closed else ""),
             )
+            update_into_remote_db(data=data)
 
         else:
             if "ACCOUNT CLOSED" in rcvd.text:
                 is_closed = True
-                text = extract_important_info(rcvd.text, is_closed=is_closed) + " ❌"
             else:
                 is_closed = False
-                text = extract_important_info(rcvd.text, is_closed=is_closed)
+            data = extract_important_info(rcvd.text, is_closed=is_closed)
             msg = await context.bot.send_message(
                 chat_id=int(os.getenv("IDS_CHANNEL_ID")),
-                text=text,
+                text="/".join(data) + (" ❌" if is_closed else ""),
             )
             await DB.add_id(
                 i=i,
                 user_id=update.effective_user.id,
                 message_id=msg.id,
-                message_text=text,
+                message_text="/".join(data) + (" ❌" if is_closed else ""),
                 is_closed=is_closed,
             )
+            insert_into_remote_db(data=data)
 
         nums = re.findall(r"\d+\.?\d*", rcvd.text)
 

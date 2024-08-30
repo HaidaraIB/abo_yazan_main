@@ -8,28 +8,15 @@ from telegram import (
     KeyboardButtonRequestChat,
     KeyboardButtonRequestUsers,
 )
-
-from telegram.ext import (
-    ContextTypes,
-    CallbackQueryHandler,
-    ConversationHandler,
-)
-
-
-from telegram.constants import (
-    ChatMemberStatus,
-    ChatType,
-)
-
+from telegram.ext import ContextTypes, CallbackQueryHandler, ConversationHandler
+from telegram.constants import ChatMemberStatus, ChatType
 from telegram.error import TimedOut, NetworkError
-
 import os
 import uuid
 import traceback
 import json
-
+import mysql.connector
 from custom_filters import User, Admin
-
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -258,3 +245,67 @@ async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> N
 def write_error(error: str):
     with open("errors.txt", "a", encoding="utf-8") as f:
         f.write(error + f"{'-'*100}\n\n\n")
+
+
+def insert_into_remote_db(data: list):
+    mydb = mysql.connector.connect(
+        host=os.getenv("REMOTE_DB_HOST"),
+        user=os.getenv("REMOTE_DB_USERNAME"),
+        password=os.getenv("REMOTE_DB_PASSWORD"),
+        database=os.getenv("REMOTE_DB_NAME"),
+    )
+
+    cr = mydb.cursor()
+
+    cr.execute(
+        f"""
+        INSERT INTO transactions (
+            `trader-id`,
+            `country`,
+            `registery-date`,
+            `link-id`,
+            `balance`,
+            `deposits-count`,
+            `deposits-sum`,
+            `withdrawals-count`,
+            `withdrawals-sum`,
+            `turnover-clear`,
+            `vol-share`
+        )
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+        """,
+        data,
+    )
+
+    mydb.commit()
+    cr.close()
+    mydb.close()
+
+def update_into_remote_db(data: list):
+    mydb = mysql.connector.connect(
+        host=os.getenv("REMOTE_DB_HOST"),
+        user=os.getenv("REMOTE_DB_USERNAME"),
+        password=os.getenv("REMOTE_DB_PASSWORD"),
+        database=os.getenv("REMOTE_DB_NAME"),
+    )
+
+    cr = mydb.cursor()
+
+    cr.execute(
+        f"""
+            UPDATE transactions SET
+                `balance` = %s,
+                `deposits-count` = %s,
+                `deposits-sum` = %s,
+                `withdrawals-count` = %s,
+                `withdrawals-sum` = %s,
+                `turnover-clear` = %s,
+                `vol-share` = %s
+            WHERE `trader-id` = %s;
+        """,
+        (*data[4:], data[0]),
+    )
+
+    mydb.commit()
+    cr.close()
+    mydb.close()

@@ -5,7 +5,7 @@ import asyncio
 import os
 import random
 from user.send_id.common import extract_important_info
-from common import edit_message_text
+from common import edit_message_text, update_into_remote_db
 
 
 async def edit_ids_info(context: ContextTypes.DEFAULT_TYPE):
@@ -30,7 +30,7 @@ async def edit_ids_info(context: ContextTypes.DEFAULT_TYPE):
                 context=context,
                 chat_id=int(os.getenv("IDS_CHANNEL_ID")),
                 message_id=int(i["message_id"]),
-                text=important_info + " ❌",
+                text="/".join(important_info) + " ❌",
             )
             continue
 
@@ -41,14 +41,15 @@ async def edit_ids_info(context: ContextTypes.DEFAULT_TYPE):
         ):
             continue
 
-        important_info = extract_important_info(rcvd.text, is_closed=False)
+        important_info = extract_important_info(text=rcvd.text, is_closed=False)
         await edit_message_text(
             context=context,
             chat_id=int(os.getenv("IDS_CHANNEL_ID")),
             message_id=int(i["message_id"]),
-            text=important_info,
+            text="/".join(important_info),
         )
-        await DB.update_message_text(i=i["id"], new_text=important_info)
+        await DB.update_message_text(i=i["id"], new_text="/".join(important_info))
+        update_into_remote_db(data=important_info)
         await asyncio.sleep(random.randint(3, 10))
 
     context.job_queue.run_once(
