@@ -25,7 +25,6 @@ from DB import DB
 from common import (
     build_user_keyboard,
     build_admin_keyboard,
-    check_if_user_member,
     request_buttons,
 )
 
@@ -71,10 +70,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     username=new_user.username,
                     name=new_user.full_name,
                 )
-
-            # member = await check_if_user_member(update=update, context=context)
-            # if not member:
-            #     return
 
             text = "أهلاً بك..."
             keyboard = build_user_keyboard()

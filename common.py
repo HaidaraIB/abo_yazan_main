@@ -9,7 +9,7 @@ from telegram import (
     KeyboardButtonRequestUsers,
 )
 from telegram.ext import ContextTypes, CallbackQueryHandler, ConversationHandler
-from telegram.constants import ChatMemberStatus, ChatType
+from telegram.constants import ChatType
 from telegram.error import TimedOut, NetworkError
 import os
 import uuid
@@ -48,32 +48,6 @@ async def edit_message_text(
             write_error(
                 f"{''.join(traceback.format_exception(None, context.error, context.error.__traceback__))}\n\n"
             )
-
-
-async def check_if_user_member(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    chat_member = await context.bot.get_chat_member(
-        chat_id=int(os.getenv("CHANNEL_ID")), user_id=update.effective_user.id
-    )
-    if chat_member.status == ChatMemberStatus.LEFT:
-        text = f"""لبدء استخدام البوت يجب عليك الانضمام الى قناة البوت أولاً.
-        
-✅ اشترك أولاً 👇.
-🔗 {os.getenv("CHANNEL_LINK")}
-
-ثم اضغط تحقق✅"""
-        check_joined_button = [
-            [InlineKeyboardButton(text="تحقق✅", callback_data="check joined")]
-        ]
-        if update.callback_query:
-            await update.callback_query.edit_message_text(
-                text=text, reply_markup=InlineKeyboardMarkup(check_joined_button)
-            )
-        else:
-            await update.message.reply_text(
-                text=text, reply_markup=InlineKeyboardMarkup(check_joined_button)
-            )
-        return False
-    return True
 
 
 def build_user_keyboard():
@@ -154,14 +128,9 @@ back_to_user_home_page_button = [
 
 async def back_to_user_home_page(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_chat.type == Chat.PRIVATE and User().filter(update):
-        # is_user_member = await check_if_user_member(update=update, context=context)
-
-        # if not is_user_member:
-        #     return
-
-        text = "القائمة الرئيسية🔝"
-        keyboard = build_user_keyboard()
-        await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
+        await update.callback_query.edit_message_text(
+            text="القائمة الرئيسية🔝", reply_markup=build_user_keyboard()
+        )
         return ConversationHandler.END
 
 
@@ -212,10 +181,6 @@ def create_folders():
 async def invalid_callback_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_chat.type == ChatType.PRIVATE:
         await update.callback_query.answer("انتهت صلاحية هذا الزر")
-        # try:
-        #     await update.callback_query.delete_message()
-        # except BadRequest:
-        #     pass
 
 
 async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -263,14 +228,14 @@ def insert_into_remote_db(data: list):
             `trader-id`,
             `country`,
             `registery-date`,
-            `link-id`,
             `balance`,
             `deposits-count`,
             `deposits-sum`,
             `withdrawals-count`,
             `withdrawals-sum`,
             `turnover-clear`,
-            `vol-share`
+            `vol-share`,
+            `is-closed`
         )
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
         """,
@@ -301,7 +266,8 @@ def update_into_remote_db(data: list):
                 `withdrawals-count` = %s,
                 `withdrawals-sum` = %s,
                 `turnover-clear` = %s,
-                `vol-share` = %s
+                `vol-share` = %s,
+                `is-closed` = %s
             WHERE `trader-id` = %s;
         """,
         (*data[4:], data[0]),
@@ -329,7 +295,7 @@ def get_from_remote_db(trader_id: int):
         """,
         (trader_id,),
     )
-    
+
     res = cr.fetchone()
 
     cr.close()

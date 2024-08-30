@@ -10,7 +10,7 @@ from telegram.ext import (
 )
 
 from custom_filters import User
-from common import stringify_question, check_if_user_member
+from common import stringify_question
 
 from admin.questions_settings.functions import build_questions_keyboard
 
@@ -20,10 +20,6 @@ from DB import DB
 async def faq(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_chat.type == Chat.PRIVATE and User().filter(update):
 
-        # member = await check_if_user_member(update=update, context=context)
-        # if not member:
-        #     return
-        
         keyboard = build_questions_keyboard(op="faq", role="user")
         if not keyboard:
             await update.callback_query.answer(
