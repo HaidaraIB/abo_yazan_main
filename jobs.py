@@ -11,10 +11,11 @@ from common import edit_message_text
 async def edit_ids_info(context: ContextTypes.DEFAULT_TYPE):
     ids = DB.get_ids()
     for i in ids:
+        trader_id = i["id"]
         cpyro = PyroClientSingleton()
         sent = await cpyro.send_message(
             chat_id="@QuotexPartnerBot",
-            text=i["trader_id"],
+            text=trader_id,
         )
         await asyncio.sleep(2)
         rcvd = await cpyro.get_messages(
@@ -23,7 +24,7 @@ async def edit_ids_info(context: ContextTypes.DEFAULT_TYPE):
         )
 
         if (
-            (str(i["trader_id"]) not in rcvd.text)
+            (str(trader_id) not in rcvd.text)
             or (not rcvd.text)
             or ("not found" in rcvd.text)
         ):
@@ -34,11 +35,11 @@ async def edit_ids_info(context: ContextTypes.DEFAULT_TYPE):
         important_info = extract_important_info(rcvd.text, is_closed=is_closed)
 
         if is_closed:
-            stored_id = DB.get_ids(i=i["trader_id"])
+            stored_id = DB.get_ids(i=trader_id)
             if not stored_id["is_closed"]:
-                await DB.close_account(i=i["trader_id"])
+                await DB.close_account(i=trader_id)
 
-        remote_data = DB.get_from_remote_db(trader_id=i["trader_id"])
+        remote_data = DB.get_from_remote_db(trader_id=trader_id)
         if remote_data:
             DB.update_into_remote_db(data=important_info, is_closed=int(is_closed))
         else:
