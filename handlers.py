@@ -20,7 +20,7 @@ from start import (
     inits,
 )
 
-from jobs import edit_ids_info
+from jobs import edit_ids_info, check_remote_ids
 
 from common import (
     back_to_user_home_page_handler,
@@ -107,10 +107,8 @@ def main():
 
     app.add_error_handler(error_handler)
 
-    app.job_queue.run_once(
-        callback=edit_ids_info,
-        when=10,
-    )
+    app.job_queue.run_once(callback=edit_ids_info, when=10)
+    app.job_queue.run_once(callback=check_remote_ids, when=10)
 
     try:
         PyroClientSingleton().start()

@@ -16,9 +16,6 @@ from common import (
     back_to_user_home_page_handler,
     build_user_keyboard,
     edit_message_text,
-    insert_into_remote_db,
-    update_into_remote_db,
-    get_from_remote_db,
 )
 from user.send_id.common import extract_important_info
 from start import start_command
@@ -64,10 +61,7 @@ async def get_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return ConversationHandler.END
 
         stored_id = DB.get_ids(i=i)
-        if "ACCOUNT CLOSED" in rcvd.text:
-            is_closed = True
-        else:
-            is_closed = False
+        is_closed = "ACCOUNT CLOSED" in rcvd.text
         data = extract_important_info(rcvd.text, is_closed=is_closed)
         if stored_id:
             if is_closed and not stored_id["is_closed"]:
@@ -91,11 +85,11 @@ async def get_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 message_text="/".join(data) + (" ❌" if is_closed else ""),
                 is_closed=is_closed,
             )
-        remote_data = get_from_remote_db(trader_id=data[0])
+        remote_data = DB.get_from_remote_db(trader_id=data[0])
         if remote_data:
-            update_into_remote_db(data=data, is_closed=int(is_closed))
+            DB.update_into_remote_db(data=data, is_closed=int(is_closed))
         else:
-            insert_into_remote_db(data=data, is_closed=int(is_closed))
+            DB.insert_into_remote_db(data=data, is_closed=int(is_closed))
 
         if float(data[5]) == 0 and not is_closed:
             await wait_message.edit_text(

@@ -1,9 +1,32 @@
 import sqlite3
+import mysql.connector
 import os
 import re
 from asyncio import Lock
 
+import mysql.connector.abstracts
+import mysql.connector.cursor
+
 lock = Lock()
+
+
+def connect_to_remote(func):
+    def wrapper(*args, **kwargs):
+        db = mysql.connector.connect(
+            host=os.getenv("REMOTE_DB_HOST"),
+            user=os.getenv("REMOTE_DB_USERNAME"),
+            password=os.getenv("REMOTE_DB_PASSWORD"),
+            database=os.getenv("REMOTE_DB_NAME"),
+        )
+        cr = db.cursor(dictionary=True)
+        result = func(*args, **kwargs, cr=cr)
+        db.commit()
+        cr.close()
+        db.close()
+        if result:
+            return result
+
+    return wrapper
 
 
 def lock_and_release(func):
@@ -211,3 +234,94 @@ class DB:
         else:
             cr.execute("SELECT * FROM ids")
             return cr.fetchall()
+
+    @staticmethod
+    @connect_to_remote
+    def insert_into_remote_db(
+        data: list,
+        is_closed: int,
+        cr: mysql.connector.abstracts.MySQLCursorAbstract = None,
+    ):
+        cr.execute(
+            f"""
+            INSERT INTO transactions (
+                `trader-id`,
+                `country`,
+                `registery-date`,
+                `balance`,
+                `deposits-count`,
+                `deposits-sum`,
+                `withdrawals-count`,
+                `withdrawals-sum`,
+                `turnover-clear`,
+                `vol-share`,
+                `is-closed`
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+            """,
+            (*data, is_closed),
+        )
+
+    @staticmethod
+    @connect_to_remote
+    def update_into_remote_db(
+        data: list,
+        is_closed: int,
+        cr: mysql.connector.abstracts.MySQLCursorAbstract = None,
+    ):
+        cr.execute(
+            f"""
+                UPDATE transactions SET
+                    `balance` = %s,
+                    `deposits-count` = %s,
+                    `deposits-sum` = %s,
+                    `withdrawals-count` = %s,
+                    `withdrawals-sum` = %s,
+                    `turnover-clear` = %s,
+                    `vol-share` = %s,
+                    `is-closed` = %s
+                WHERE `trader-id` = %s;
+            """,
+            (*data[3:], is_closed, data[0]),
+        )
+
+    @staticmethod
+    @connect_to_remote
+    def get_from_remote_db(
+        trader_id: int, cr: mysql.connector.abstracts.MySQLCursorAbstract = None
+    ):
+        cr.execute(
+            f"""
+                SELECT * FROM transactions
+                WHERE `trader-id` = %s;
+            """,
+            (trader_id,),
+        )
+
+        return cr.fetchone()
+
+    @staticmethod
+    @connect_to_remote
+    def get_trader_ids_to_check(
+        cr: mysql.connector.abstracts.MySQLCursorAbstract = None,
+    ):
+
+        cr.execute(
+            f"""
+                SELECT * FROM traderstest
+            """
+        )
+
+        return cr.fetchall()
+
+    @staticmethod
+    @connect_to_remote
+    def delete_checked_remote_id(
+        i: int, cr: mysql.connector.abstracts.MySQLCursorAbstract = None
+    ):
+        cr.execute(
+            """
+                DELETE FROM traderstest WHERE trader_id = %s
+            """,
+            (i,),
+        )
