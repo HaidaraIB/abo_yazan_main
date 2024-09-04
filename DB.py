@@ -23,8 +23,7 @@ def connect_to_remote(func):
         db.commit()
         cr.close()
         db.close()
-        if result:
-            return result
+        return result
 
     return wrapper
 
