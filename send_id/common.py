@@ -40,8 +40,8 @@ def extract_important_info(text: str, is_closed: bool):
                     pass
 
     important_lines[2] = important_lines[2][:-1]
-    important_lines[-2] = f"{(float(important_lines[-2].replace(",", "")) * 0.4):.2f}"
-    important_lines[-1] = f"{(float(important_lines[-1].replace(",", "")) * 0.4):.2f}"
+    important_lines[-2] = f"{(float(important_lines[-2].replace(',', '')) * 0.4):.2f}"
+    important_lines[-1] = f"{(float(important_lines[-1].replace(',', '')) * 0.4):.2f}"
 
     return important_lines
 
@@ -55,7 +55,7 @@ def stringify_id_info(info: list, is_closed: bool):
         f"{'-' * 27}\n"
         f"Balance: $ {info[3]}\n"
         f"Deposit Count: {info[4]}\n"
-        f"Deposit Sum: {info[5]}\n"
+        f"Deposit Sum: $ {info[5]}\n"
         f"Withdrawals Count: {info[6]}\n"
         f"Withdrawals Sum: $ {info[7]}\n"
         f"Turnover Clear: $ {info[8]}\n"
