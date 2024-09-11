@@ -25,7 +25,7 @@ def extract_important_info(text: str, is_closed: bool):
             "vol_share": 20,
         }
     all_lines = text.split("\n")
-    important_lines = []
+    important_lines: list[str] = []
 
     for line_number in important_line_names_to_numbers_mapper.values():
         try:
@@ -40,8 +40,8 @@ def extract_important_info(text: str, is_closed: bool):
                     pass
 
     important_lines[2] = important_lines[2][:-1]
-    important_lines[-2] = f"{(float(important_lines[-2]) * 0.4):.2f}"
-    important_lines[-1] = f"{(float(important_lines[-1]) * 0.4):.2f}"
+    important_lines[-2] = f"{(float(important_lines[-2].replace(",", "")) * 0.4):.2f}"
+    important_lines[-1] = f"{(float(important_lines[-1].replace(",", "")) * 0.4):.2f}"
 
     return important_lines
 
