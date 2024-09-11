@@ -1,9 +1,4 @@
-from telegram import (
-    Chat,
-    Update,
-    InlineKeyboardButton,
-    InlineKeyboardMarkup,
-)
+from telegram import Chat, Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     ContextTypes,
     ConversationHandler,
@@ -19,7 +14,6 @@ from common import (
 )
 
 from start import start_command
-
 from DB import DB
 import asyncio
 from custom_filters.Admin import Admin
@@ -72,7 +66,10 @@ back_to_the_message = broadcast_message
 
 async def send_to_all(context: ContextTypes.DEFAULT_TYPE):
     all_users = DB.get_all_users()
-    text = context.user_data["the message"] + "\n\n<b>🚩🚩🚩 هذه الرسالة من آدمن البوت 🚩🚩🚩</b>"
+    text = (
+        context.user_data["the message"]
+        + "\n\n<b>🚩🚩🚩 هذه الرسالة من آدمن البوت 🚩🚩🚩</b>"
+    )
     for user in all_users:
         try:
             await context.bot.send_message(chat_id=user[0], text=text)

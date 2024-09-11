@@ -1,10 +1,4 @@
-from telegram import (
-    Update,
-    Chat,
-    InlineKeyboardMarkup,
-    InlineKeyboardButton,
-)
-
+from telegram import Update, Chat, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import (
     ContextTypes,
     CallbackQueryHandler,
@@ -12,9 +6,7 @@ from telegram.ext import (
     MessageHandler,
     filters,
 )
-
 from custom_filters import *
-
 from DB import DB
 
 from common import (
@@ -22,13 +14,13 @@ from common import (
     back_to_admin_home_page_handler,
     back_to_admin_home_page_button,
 )
-
 from start import start_command
 
 (
     USER_ID_TO_BAN_UNBAN,
     BAN_UNBAN_USER,
 ) = range(2)
+
 
 async def ban_unban(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_chat.type == Chat.PRIVATE and Admin().filter(update):
@@ -49,7 +41,7 @@ async def user_id_to_ban_unban(update: Update, context: ContextTypes.DEFAULT_TYP
         if not user:
             await update.message.reply_text(
                 text="لم يتم العثور على المستخدم، تأكد من الآيدي وأعد إرساله. ❌",
-                reply_markup=InlineKeyboardMarkup(back_to_admin_home_page_button)
+                reply_markup=InlineKeyboardMarkup(back_to_admin_home_page_button),
             )
             return
         if user["banned"]:
@@ -93,6 +85,7 @@ async def ban_unban_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=build_admin_keyboard(),
         )
         return ConversationHandler.END
+
 
 ban_unban_user_handler = ConversationHandler(
     entry_points=[

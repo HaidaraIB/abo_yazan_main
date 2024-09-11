@@ -1,10 +1,4 @@
-from telegram import (
-    Update,
-    Chat,
-    InlineKeyboardButton,
-    InlineKeyboardMarkup,
-)
-
+from telegram import Update, Chat, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     ContextTypes,
     ConversationHandler,
@@ -12,7 +6,6 @@ from telegram.ext import (
     MessageHandler,
     filters,
 )
-
 from admin.questions_settings.functions import build_questions_keyboard
 from admin.questions_settings.question_settings import back_to_question_settings_handler
 from custom_filters import *
@@ -25,7 +18,11 @@ from common import (
     back_to_admin_home_page_handler,
 )
 
-(Q_TO_UPDATE, CHOOSE_UPDATE_QUESTION, UPDATE_Q) = range(3)
+(
+    Q_TO_UPDATE,
+    CHOOSE_UPDATE_QUESTION,
+    UPDATE_Q,
+) = range(3)
 
 update_question_keyboard = [
     [InlineKeyboardButton(text="السؤال❓", callback_data="update question")],
@@ -37,12 +34,12 @@ update_question_keyboard = [
 
 async def update_question(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_chat.type == Chat.PRIVATE and Admin().filter(update):
-        keyboard = build_questions_keyboard('u')
-        
+        keyboard = build_questions_keyboard("u")
+
         if not keyboard:
             await update.callback_query.answer("ليس لديك أسئلة بعد ❗️", show_alert=True)
             return ConversationHandler.END
-        
+
         await update.callback_query.edit_message_text(
             text="اختر السؤال الذي تريد تعديله",
             reply_markup=InlineKeyboardMarkup(keyboard),
@@ -132,5 +129,5 @@ update_question_handler = ConversationHandler(
         back_to_question_settings_handler,
         CallbackQueryHandler(back_to_q_to_update, "^back to q to update$"),
         CallbackQueryHandler(back_to_update_question, "^back to update question$"),
-    ]
+    ],
 )

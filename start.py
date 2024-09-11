@@ -15,10 +15,7 @@ from telegram.ext import (
     CallbackQueryHandler,
 )
 
-from telegram.constants import (
-    ChatMemberStatus,
-)
-
+from telegram.constants import ChatMemberStatus
 import os
 from DB import DB
 

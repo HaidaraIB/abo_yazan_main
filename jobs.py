@@ -4,7 +4,7 @@ from PyroClientSingleton import PyroClientSingleton
 import asyncio
 import os
 import random
-from user.send_id.common import extract_important_info
+from send_id.common import extract_important_info
 from common import edit_message_text
 
 

@@ -1,22 +1,14 @@
 from telegram import Update, Chat, InlineKeyboardMarkup
-
-from telegram.ext import (
-    ContextTypes,
-    CallbackQueryHandler,
-    ConversationHandler,
-)
-
-
+from telegram.ext import ContextTypes, CallbackQueryHandler, ConversationHandler
 from admin.questions_settings.functions import build_questions_keyboard
 from admin.questions_settings.question_settings import back_to_question_settings_handler
 from common import (
     build_admin_keyboard,
-    back_to_admin_home_page_handler,
     stringify_question,
+    back_to_admin_home_page_handler,
 )
 from start import start_command
 from custom_filters import *
-
 from DB import DB
 
 Q_TO_SHOW = range(1)

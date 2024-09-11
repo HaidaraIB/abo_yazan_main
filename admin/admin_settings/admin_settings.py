@@ -1,9 +1,4 @@
-from telegram import (
-    Chat,
-    Update,
-    InlineKeyboardButton,
-    InlineKeyboardMarkup,
-)
+from telegram import Chat, Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     ContextTypes,
     ConversationHandler,
@@ -24,7 +19,11 @@ import os
 from DB import DB
 from custom_filters.Admin import Admin
 
-(NEW_ADMIN_ID, CHOOSE_ADMIN_ID_TO_REMOVE) = range(2)
+(
+    NEW_ADMIN_ID,
+    CHOOSE_ADMIN_ID_TO_REMOVE,
+) = range(2)
+
 
 async def admin_settings(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_chat.type == Chat.PRIVATE and Admin().filter(update):
