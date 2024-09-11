@@ -84,7 +84,7 @@ async def copy_messages(event, gallery, to):
                         caption=(
                             "ربح ✅✅✅\n"
                             "للإنظمام الى جروب الـvip 🔥\n\n"
-                            "[TEAM ABO YAZAN](t.me/BOUCHA_A)      [abo yazan](t.me/aboyazan1_bot)"
+                            "[TEAM ABO YAZAN](t.me/BOUCHA_A)"
                         ),
                         file=message.photo if message.photo else message.video,
                         reply_to=stored_msg[0] if stored_msg else None,
