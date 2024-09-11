@@ -72,7 +72,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 )
 
             text = "أهلاً بك..."
-            keyboard = build_user_keyboard()
+            keyboard = None
 
         await update.message.reply_text(
             text=text,

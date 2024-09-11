@@ -1,7 +1,4 @@
-from telegram import (
-    Update,
-)
-
+from telegram import Update
 from telegram.ext import (
     CallbackQueryHandler,
     Application,
@@ -9,43 +6,23 @@ from telegram.ext import (
     InvalidCallbackData,
     Defaults,
 )
-
-from telegram.constants import (
-    ParseMode,
-)
-
-from start import (
-    start_command,
-    check_joined_handler,
-    inits,
-)
-
+from telegram.constants import ParseMode
+from start import start_command, inits
 from jobs import edit_ids_info, check_remote_ids
-
 from common import (
-    back_to_user_home_page_handler,
     back_to_admin_home_page_handler,
     invalid_callback_data,
     error_handler,
     create_folders,
 )
-
-from user.user_calls import *
-
 from admin.admin_calls import *
 from admin.admin_settings import *
 from admin.broadcast import *
 from admin.ban import *
-
 from admin.questions_settings import *
-
-from user.faq import *
-from user.join_channels import *
-from user.send_id import *
-
+from send_id.send_id import send_id_handler
 import os
 from DB import DB
-
 from PyroClientSingleton import PyroClientSingleton
 
 
@@ -93,16 +70,16 @@ def main():
     # app.add_handler(q_to_show_user_handler)
 
     # JOIN CHANNELS
-    app.add_handler(join_vip_handler)
+    # app.add_handler(join_vip_handler)
     # app.add_handler(join_edu_handler)
 
     # SEND ID
     app.add_handler(send_id_handler)
 
     app.add_handler(start_command)
-    app.add_handler(find_id_handler)
-    app.add_handler(hide_ids_keyboard_handler)
-    app.add_handler(back_to_user_home_page_handler)
+    # app.add_handler(find_id_handler)
+    # app.add_handler(hide_ids_keyboard_handler)
+    # app.add_handler(back_to_user_home_page_handler)
     app.add_handler(back_to_admin_home_page_handler)
 
     app.add_error_handler(error_handler)
