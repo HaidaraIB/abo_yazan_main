@@ -36,6 +36,7 @@ async def get_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     " بشكل صحيح ، ثم إعاده المحاولة من جديد."
                 ),
             )
+            return
 
         stored_id = DB.get_ids(i=i)
         is_closed = "ACCOUNT CLOSED" in rcvd.text
