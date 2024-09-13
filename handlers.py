@@ -84,8 +84,8 @@ def main():
 
     app.add_error_handler(error_handler)
 
-    # app.job_queue.run_once(callback=edit_ids_info, when=10)
-    # app.job_queue.run_once(callback=check_remote_ids, when=10)
+    app.job_queue.run_once(callback=edit_ids_info, when=10)
+    app.job_queue.run_once(callback=check_remote_ids, when=10)
 
     try:
         PyroClientSingleton().start()
