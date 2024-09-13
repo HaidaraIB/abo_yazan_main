@@ -23,7 +23,11 @@ async def get_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
             chat_id="@QuotexPartnerBot",
             message_ids=sent.id + 1,
         )
-        if not rcvd.text or "not found" in rcvd.text or "Trader #" not in rcvd.text:
+        if (
+            (not rcvd.text)
+            or ("not found" in rcvd.text)
+            or ("Trader #" not in rcvd.text)
+        ):
             await wait_message.edit_text(
                 text=(
                     "عذراً لم يتم العثور على حسابك"
