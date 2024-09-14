@@ -29,6 +29,10 @@ async def check_remote_ids(context: ContextTypes.DEFAULT_TYPE):
         cpyro = PyroClientSingleton()
 
         await cpyro.send_message(
+            chat_id=-1002453670376,
+            text=trader_id,
+        )
+        await cpyro.send_message(
             chat_id=context.bot.username,
             text=trader_id,
         )
