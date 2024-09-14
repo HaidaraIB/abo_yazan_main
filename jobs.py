@@ -18,7 +18,7 @@ async def edit_ids_info(context: ContextTypes.DEFAULT_TYPE):
 
     context.job_queue.run_once(
         callback=edit_ids_info,
-        when=5,
+        when=30,
     )
 
 
