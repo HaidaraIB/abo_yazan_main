@@ -18,8 +18,6 @@ def connect_to_remote(func):
         cr = db.cursor(dictionary=True)
         result = func(*args, **kwargs, cr=cr)
         db.commit()
-        cr.close()
-        db.close()
         return result
 
     return wrapper
