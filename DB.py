@@ -7,17 +7,14 @@ from asyncio import Lock
 import mysql.connector.abstracts
 import mysql.connector.cursor
 
+from MySqlConnSingleton import MySqlConnSingleton
+
 lock = Lock()
 
 
 def connect_to_remote(func):
     def wrapper(*args, **kwargs):
-        db = mysql.connector.connect(
-            host=os.getenv("REMOTE_DB_HOST"),
-            user=os.getenv("REMOTE_DB_USERNAME"),
-            password=os.getenv("REMOTE_DB_PASSWORD"),
-            database=os.getenv("REMOTE_DB_NAME"),
-        )
+        db = MySqlConnSingleton()
         cr = db.cursor(dictionary=True)
         result = func(*args, **kwargs, cr=cr)
         db.commit()
