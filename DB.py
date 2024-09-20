@@ -1,5 +1,6 @@
 import sqlite3
 import mysql.connector
+from mysql.connector.errors import OperationalError, DatabaseError
 import os
 import re
 from asyncio import Lock
@@ -14,12 +15,13 @@ lock = Lock()
 
 def connect_to_remote(func):
     def wrapper(*args, **kwargs):
-        db = MySqlConnSingleton()
         try:
+            db = MySqlConnSingleton()
             cr = db.cursor(dictionary=True)
-        except mysql.connector.errors.OperationalError:
+        except (OperationalError, DatabaseError):
             MySqlConnSingleton.destroy()
             db = MySqlConnSingleton()
+            cr = db.cursor(dictionary=True)
         result = func(*args, **kwargs, cr=cr)
         db.commit()
         return result
