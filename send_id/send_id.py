@@ -1,4 +1,4 @@
-from telegram import Update, Chat
+from telegram import Update, Chat, error
 from telegram.ext import ContextTypes, MessageHandler, filters
 import asyncio
 import os
@@ -68,10 +68,15 @@ async def get_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
             DB.update_into_remote_db(data=data, is_closed=int(is_closed))
         else:
             DB.insert_into_remote_db(data=data, is_closed=int(is_closed))
-
-        await update.message.reply_text(
-            text=stringify_id_info(info=data, is_closed=is_closed)
-        )
+        try:
+            await update.message.reply_text(
+                text=stringify_id_info(info=data, is_closed=is_closed)
+            )
+        except error.RetryAfter as r:
+            await asyncio.sleep(r.retry_after)
+            await update.message.reply_text(
+                text=stringify_id_info(info=data, is_closed=is_closed)
+            )
 
 
 send_id_handler = MessageHandler(

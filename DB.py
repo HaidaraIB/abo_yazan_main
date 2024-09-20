@@ -15,7 +15,11 @@ lock = Lock()
 def connect_to_remote(func):
     def wrapper(*args, **kwargs):
         db = MySqlConnSingleton()
-        cr = db.cursor(dictionary=True)
+        try:
+            cr = db.cursor(dictionary=True)
+        except mysql.connector.errors.OperationalError:
+            MySqlConnSingleton.destroy()
+            db = MySqlConnSingleton()
         result = func(*args, **kwargs, cr=cr)
         db.commit()
         return result

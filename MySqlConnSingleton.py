@@ -16,3 +16,8 @@ class MySqlConnSingleton(Client):
                 database=os.getenv("REMOTE_DB_NAME"),
             )
         return cls._instance
+
+    @classmethod
+    def destroy(cls):
+        if cls._instance:
+            cls._instance = None
