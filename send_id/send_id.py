@@ -11,7 +11,11 @@ from DB import DB
 
 async def get_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_chat.type == Chat.PRIVATE and User().filter(update):
-        wait_message = await update.message.reply_text(text="الرجاء الانتظار...")
+        try:
+            wait_message = await update.message.reply_text(text="الرجاء الانتظار...")
+        except error.RetryAfter as r:
+            await asyncio.sleep(r.retry_after)
+            wait_message = await update.message.reply_text(text="الرجاء الانتظار...")
         i = update.message.text
         cpyro = PyroClientSingleton()
         sent = await cpyro.send_message(
