@@ -2,7 +2,6 @@ from telegram.ext import ContextTypes
 from DB import DB
 from PyroClientSingleton import PyroClientSingleton
 import asyncio
-import random
 
 
 async def edit_ids_info(context: ContextTypes.DEFAULT_TYPE):
@@ -14,7 +13,7 @@ async def edit_ids_info(context: ContextTypes.DEFAULT_TYPE):
             chat_id=context.bot.username,
             text=trader_id,
         )
-        await asyncio.sleep(random.randint(3, 10))
+        await asyncio.sleep(5)
 
     context.job_queue.run_once(
         callback=edit_ids_info,
