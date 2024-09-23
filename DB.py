@@ -4,11 +4,8 @@ from mysql.connector.errors import OperationalError, DatabaseError
 import os
 import re
 from asyncio import Lock
-
-import mysql.connector.abstracts
-import mysql.connector.cursor
-
 from MySqlConnSingleton import MySqlConnSingleton
+import sys
 
 lock = Lock()
 
@@ -19,9 +16,7 @@ def connect_to_remote(func):
             db = MySqlConnSingleton()
             cr = db.cursor(dictionary=True)
         except (OperationalError, DatabaseError):
-            MySqlConnSingleton.destroy()
-            db = MySqlConnSingleton()
-            cr = db.cursor(dictionary=True)
+            os.execl(sys.executable, sys.executable, *sys.argv)
         result = func(*args, **kwargs, cr=cr)
         db.commit()
         return result

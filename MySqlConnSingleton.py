@@ -1,9 +1,8 @@
-from pyrogram import Client
 import os
 import mysql.connector
 
 
-class MySqlConnSingleton(Client):
+class MySqlConnSingleton:
     _instance = None
 
     def __new__(cls, *args, **kwargs):
@@ -20,4 +19,5 @@ class MySqlConnSingleton(Client):
     @classmethod
     def destroy(cls):
         if cls._instance:
+            cls._instance.shutdown()
             cls._instance = None
