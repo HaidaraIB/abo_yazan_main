@@ -1,5 +1,6 @@
 import sqlite3
 import mysql.connector
+import mysql.connector.abstracts
 from mysql.connector.errors import OperationalError, DatabaseError
 import os
 import re
