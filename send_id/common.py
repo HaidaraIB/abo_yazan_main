@@ -49,8 +49,12 @@ def extract_important_info(text: str, is_closed: bool):
 
     important_lines[2] = important_lines[2][:-1]
     try:
-        important_lines[-2] = f"{(float(important_lines[-2].replace(',', '')) * 0.4):.2f}"
-        important_lines[-1] = f"{(float(important_lines[-1].replace(',', '')) * 0.4):.2f}"
+        important_lines[-2] = (
+            f"{(float(important_lines[-2].replace(',', '')) * 0.4):.2f}"
+        )
+        important_lines[-1] = (
+            f"{(float(important_lines[-1].replace(',', '')) * 0.4):.2f}"
+        )
     except ValueError:
         pass
 
@@ -90,8 +94,12 @@ async def get_id_info(
         chat_id="@QuotexPartnerBot",
         message_ids=sent.id + 1,
     )
-    if (not rcvd.text) or ("not found" in rcvd.text) or ("Trader #" not in rcvd.text):
-
+    if (
+        (not rcvd.text)
+        or ("not found" in rcvd.text)
+        or ("Trader #" not in rcvd.text)
+        or ("Link Id: 983427" not in rcvd.text)
+    ):
         return "not found"
 
     stored_id = DB.get_ids(i=i)
@@ -100,13 +108,20 @@ async def get_id_info(
     if stored_id:
         if is_closed and not stored_id["is_closed"]:
             await DB.close_account(i=i)
-        await DB.update_message_text(i=i, new_text="/".join(data))
-        await edit_message_text(
-            context=context,
-            chat_id=int(os.getenv("IDS_CHANNEL_ID")),
-            message_id=int(stored_id["message_id"]),
-            text="/".join(data) + (" ❌" if is_closed else ""),
-        )
+            await DB.update_message_text(i=i, new_text="/".join(data))
+            await edit_message_text(
+                context=context,
+                chat_id=int(os.getenv("IDS_CHANNEL_ID")),
+                message_id=int(stored_id["message_id"]),
+                text="/".join(data) + (" ❌" if is_closed else ""),
+            )
+            remote_data = DB.get_from_remote_db(trader_id=data[0])
+            if remote_data:
+                DB.update_into_remote_db(data=data, is_closed=int(is_closed))
+            else:
+                DB.insert_into_remote_db(data=data, is_closed=int(is_closed))
+        else:
+            return "not found"
     else:
         msg = await context.bot.send_message(
             chat_id=int(os.getenv("IDS_CHANNEL_ID")),
@@ -119,10 +134,10 @@ async def get_id_info(
             message_text="/".join(data) + (" ❌" if is_closed else ""),
             is_closed=is_closed,
         )
-    remote_data = DB.get_from_remote_db(trader_id=data[0])
-    if remote_data:
-        DB.update_into_remote_db(data=data, is_closed=int(is_closed))
-    else:
-        DB.insert_into_remote_db(data=data, is_closed=int(is_closed))
+        remote_data = DB.get_from_remote_db(trader_id=data[0])
+        if remote_data:
+            DB.update_into_remote_db(data=data, is_closed=int(is_closed))
+        else:
+            DB.insert_into_remote_db(data=data, is_closed=int(is_closed))
 
     return data, is_closed
