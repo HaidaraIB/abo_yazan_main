@@ -123,20 +123,13 @@ async def get_id_info(
     if stored_id:
         if is_closed and not stored_id["is_closed"]:
             await DB.close_account(i=i)
-            await DB.update_message_text(i=i, new_text="/".join(data))
-            await edit_message_text(
-                context=context,
-                chat_id=ids_channel_id,
-                message_id=int(stored_id["message_id"]),
-                text="/".join(data) + (" ❌" if is_closed else ""),
-            )
-            remote_data = DB.get_from_remote_db(trader_id=data[0])
-            if remote_data:
-                DB.update_into_remote_db(data=data, is_closed=int(is_closed))
-            else:
-                DB.insert_into_remote_db(data=data, is_closed=int(is_closed))
-        else:
-            return "not found"
+        await DB.update_message_text(i=i, new_text="/".join(data))
+        await edit_message_text(
+            context=context,
+            chat_id=ids_channel_id,
+            message_id=int(stored_id["message_id"]),
+            text="/".join(data) + (" ❌" if is_closed else ""),
+        )
     else:
         msg = await context.bot.send_message(
             chat_id=ids_channel_id,
@@ -149,10 +142,10 @@ async def get_id_info(
             message_text="/".join(data) + (" ❌" if is_closed else ""),
             is_closed=is_closed,
         )
-        remote_data = DB.get_from_remote_db(trader_id=data[0])
-        if remote_data:
-            DB.update_into_remote_db(data=data, is_closed=int(is_closed))
-        else:
-            DB.insert_into_remote_db(data=data, is_closed=int(is_closed))
+    remote_data = DB.get_from_remote_db(trader_id=data[0])
+    if remote_data:
+        DB.update_into_remote_db(data=data, is_closed=int(is_closed))
+    else:
+        DB.insert_into_remote_db(data=data, is_closed=int(is_closed))
 
     return data, is_closed
