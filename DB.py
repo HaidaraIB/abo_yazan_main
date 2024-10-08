@@ -334,7 +334,7 @@ class DB:
     ):
         cr.execute(
             """
-                DELETE FROM traderstest WHERE `trader-id` = %s
+                DELETE FROM transactions WHERE `trader-id` = %s
             """,
             (i,),
         )

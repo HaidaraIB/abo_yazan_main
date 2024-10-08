@@ -98,6 +98,9 @@ async def get_id_info(
     if (not rcvd.text) or ("not found" in rcvd.text) or ("Trader #" not in rcvd.text):
         return "not found"
 
+    is_closed = "ACCOUNT CLOSED" in rcvd.text
+    data = extract_important_info(rcvd.text, is_closed=is_closed)
+
     if "Link Id: 983427" not in rcvd.text:
         stored_id = DB.get_ids(i=i)
         if stored_id:
@@ -112,10 +115,9 @@ async def get_id_info(
         remote_data = DB.get_from_remote_db(trader_id=data[0])
         if remote_data:
             DB.delete_from_remote(i=i)
+        return "not found"
 
-    is_closed = "ACCOUNT CLOSED" in rcvd.text
     stored_id = DB.get_ids(i=i)
-    data = extract_important_info(rcvd.text, is_closed=is_closed)
     if stored_id:
         if is_closed and not stored_id["is_closed"]:
             await DB.close_account(i=i)
