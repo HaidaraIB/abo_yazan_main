@@ -84,6 +84,10 @@ async def get_id_info(
     i: str,
     user_id: int = 6603740400,
 ):
+    stored_id = DB.get_ids(i=i)
+    if stored_id and stored_id["is_closed"]:
+        return "not found"
+
     ids_channel_id = int(os.getenv("IDS_CHANNEL_ID"))
     cpyro = PyroClientSingleton()
     sent = await cpyro.send_message(
@@ -102,7 +106,6 @@ async def get_id_info(
     data = extract_important_info(rcvd.text, is_closed=is_closed)
 
     if "Link Id: 983427" not in rcvd.text:
-        stored_id = DB.get_ids(i=i)
         if stored_id:
             try:
                 await context.bot.delete_message(
@@ -117,7 +120,6 @@ async def get_id_info(
             DB.delete_from_remote(i=i)
         return "not found"
 
-    stored_id = DB.get_ids(i=i)
     if stored_id:
         if is_closed and not stored_id["is_closed"]:
             await DB.close_account(i=i)
