@@ -101,10 +101,13 @@ async def get_id_info(
     if "Link Id: 983427" not in rcvd.text:
         stored_id = DB.get_ids(i=i)
         if stored_id:
-            await context.bot.delete_message(
-                chat_id=ids_channel_id,
-                message_id=int(stored_id["message_id"]),
-            )
+            try:
+                await context.bot.delete_message(
+                    chat_id=ids_channel_id,
+                    message_id=int(stored_id["message_id"]),
+                )
+            except:
+                pass
             await DB.delete_id(i=i)
         remote_data = DB.get_from_remote_db(trader_id=data[0])
         if remote_data:
