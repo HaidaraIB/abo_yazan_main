@@ -84,6 +84,7 @@ async def get_id_info(
     i: str,
     user_id: int = 6603740400,
 ):
+    ids_channel_id = int(os.getenv("IDS_CHANNEL_ID"))
     cpyro = PyroClientSingleton()
     sent = await cpyro.send_message(
         chat_id="@QuotexPartnerBot",
@@ -94,15 +95,21 @@ async def get_id_info(
         chat_id="@QuotexPartnerBot",
         message_ids=sent.id + 1,
     )
-    if (
-        (not rcvd.text)
-        or ("not found" in rcvd.text)
-        or ("Trader #" not in rcvd.text)
-        or ("Link Id: 983427" not in rcvd.text)
-    ):
+    if (not rcvd.text) or ("not found" in rcvd.text) or ("Trader #" not in rcvd.text):
         return "not found"
 
-    stored_id = DB.get_ids(i=i)
+    if "Link Id: 983427" not in rcvd.text:
+        stored_id = DB.get_ids(i=i)
+        if stored_id:
+            await context.bot.delete_message(
+                chat_id=ids_channel_id,
+                message_id=int(stored_id["message_id"]),
+            )
+            await DB.delete_id(i=i)
+        remote_data = DB.get_from_remote_db(trader_id=data[0])
+        if remote_data:
+            DB.delete_from_remote(i=i)
+
     is_closed = "ACCOUNT CLOSED" in rcvd.text
     data = extract_important_info(rcvd.text, is_closed=is_closed)
     if stored_id:
@@ -111,7 +118,7 @@ async def get_id_info(
             await DB.update_message_text(i=i, new_text="/".join(data))
             await edit_message_text(
                 context=context,
-                chat_id=int(os.getenv("IDS_CHANNEL_ID")),
+                chat_id=ids_channel_id,
                 message_id=int(stored_id["message_id"]),
                 text="/".join(data) + (" ❌" if is_closed else ""),
             )
@@ -124,7 +131,7 @@ async def get_id_info(
             return "not found"
     else:
         msg = await context.bot.send_message(
-            chat_id=int(os.getenv("IDS_CHANNEL_ID")),
+            chat_id=ids_channel_id,
             text="/".join(data) + (" ❌" if is_closed else ""),
         )
         await DB.add_id(

@@ -213,6 +213,11 @@ class DB:
 
     @staticmethod
     @lock_and_release
+    async def delete_id(i: int, cr: sqlite3.Cursor = None):
+        cr.execute("DELETE FROM ids WHERE id = ?", (i,))
+
+    @staticmethod
+    @lock_and_release
     async def update_message_text(i: int, new_text: str, cr: sqlite3.Cursor = None):
         cr.execute("UPDATE ids SET message_text = ? WHERE id = ?", (new_text, i))
 
@@ -318,6 +323,18 @@ class DB:
         cr.execute(
             """
                 DELETE FROM traderstest WHERE trader_id = %s
+            """,
+            (i,),
+        )
+
+    @staticmethod
+    @connect_to_remote
+    def delete_from_remote(
+        i: int, cr: mysql.connector.abstracts.MySQLCursorAbstract = None
+    ):
+        cr.execute(
+            """
+                DELETE FROM traderstest WHERE `trader-id` = %s
             """,
             (i,),
         )
