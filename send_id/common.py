@@ -111,6 +111,7 @@ async def get_id_info(
             DB.delete_from_remote(i=i)
 
     is_closed = "ACCOUNT CLOSED" in rcvd.text
+    stored_id = DB.get_ids(i=i)
     data = extract_important_info(rcvd.text, is_closed=is_closed)
     if stored_id:
         if is_closed and not stored_id["is_closed"]:
